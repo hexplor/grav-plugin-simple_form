@@ -8,6 +8,6 @@ author:
   url: http://nunopress.com
 homepage: https://github.com/nunopress/grav-plugin-simple_form
 demo: http://grav-demo.nunopress.com/
-keywords: [getsimpleform, form, contact, plugin, jquery, ajax]
+keywords: "getsimpleform, form, contact, plugin, jquery, ajax"
 bugs: https://github.com/nunopress/grav-plugin-simple_form/issues
 license: MIT
