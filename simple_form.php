@@ -6,79 +6,88 @@ use Grav\Common\Plugin;
 
 class Simple_FormPlugin extends Plugin
 {
-  private $plugin_name = 'simple_form';
-  private $plugin_data = array();
+    private $data = [];
 
-  public static function getSubscribedEvents()
-  {
-    return [
-      'onPluginsInitialized' => ['onPluginsInitialized', 0]
-    ];
-  }
+    private function mergeConfig(Page $page)
+    {
+        $defaults = $this->grav['config']->get('plugins.simple_form');
 
-  public function onPluginsInitialized()
-  {
-    if ( $this->isAdmin() ) {
-      $this->active = false;
-      return;
+        if (is_array($page->header()->simple_form)) {
+            $this->grav['config']->set('plugins.simple_form', array_replace_recursive($defaults, $page->header()->simple_form));
+        }
     }
 
-    $this->enable([
-      'onTwigTemplatePaths'   => ['onTwigTemplatePaths', 0],
-      'onPageProcessed'       => ['onPageProcessed', 0],
-      'onCollectionProcessed' => ['onCollectionProcessed', 0]
-    ]);
-  }
+    private function validate(Page $page)
+    {
+        if (isset($page->header()->simple_form) and $page->header()->simple_form) {
+            $this->mergeConfig($page);
 
-  public function onTwigTemplatePaths()
-  {
-    $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
-  }
+            return ($this->grav['config']->get('plugins.simple_form.token')) ? true : false;
+        }
 
-  public function onCollectionProcessed(Event $event)
-  {
-    $collection = $event['collection'];
-
-    foreach ( $collection as $page ) {
-      $this->pageProcess($page);
-    }
-  }
-
-  public function onPageProcessed(Event $event)
-  {
-    $page = $event['page'];
-
-    $this->pageProcess($page);
-  }
-
-  private function pageProcess(Page $page)
-  {
-    if ( ! isset($page->header()->{$this->plugin_name}) or ! $page->header()->{$this->plugin_name} ) {
-      return;
+        return false;
     }
 
-    $params = $this->grav['config']->get('plugins.' . $this->plugin_name);
+    private function pageProcess(Page $page)
+    {
+        $this->validate($page);
 
-    if ( is_array($page->header()->{$this->plugin_name}) ) {
-      $params = array_replace_recursive($params, $page->header()->{$this->plugin_name});
+        $config = $this->grav['config']->get('plugins.simple_form');
+
+        if ($config['short_code']) {
+            $old_content = $page->content();
+
+            $this->data['html'] = $this->grav['twig']->twig()->render('plugins/simple_form/' . $config['template_file'], ['fields' => $config['fields'], 'token' => $config['token']]);
+
+            $content = str_replace('{[' . $config['short_code'] . ']}', $this->data['html'], $old_content);
+            $page->content($content);
+        }
+
+        /* @todo: Removed for now. */
+        //$this->grav['twig']->twig_vars['simple_form'] = $this->data;
+
+        $this->grav['assets']->addInlineJs($this->grav['twig']->twig()->render('plugins/simple_form/simple_form.js.twig', ['fields' => $config['fields'], 'token' => $config['token'], 'messages' => $config['messages']]));
     }
 
-    if ( $params['short_code'] or $params['auto_content'] ) {
-      $old_content = $page->content();
-
-      $this->plugin_data['html'] = $this->grav['twig']->twig()->render('plugins/simple_form/simple_form.html.twig', ['fields' => $params['fields'], 'token' => $params['token']]);
-
-      if ( $params['short_code'] ) {
-        $content = str_replace('{[simple_form]}', $this->plugin_data['html'], $old_content);
-        $page->content($content);
-      }
-
-      if ( $params['auto_content'] ) {
-        $page->content($this->plugin_data['html']);
-      }
+    public static function getSubscribedEvents()
+    {
+        return [
+            'onPluginsInitialized' => ['onPluginsInitialized', 0]
+        ];
     }
 
-    $this->grav['twig']->twig_vars['simple_form'] = $this->plugin_data;
-    $this->grav['assets']->addInlineJs($this->grav['twig']->twig()->render('plugins/simple_form/simple_form.js.twig', ['fields' => $params['fields'], 'token' => $params['token'], 'messages' => $params['messages']]));
-  }
+    public function onPluginsInitialized()
+    {
+        if ($this->isAdmin()) {
+            $this->active = false;
+            return;
+        }
+
+        $this->enable([
+            'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
+            'onPageProcessed'           => ['onPageProcessed', 0],
+            'onCollectionProcessed'     => ['onCollectionProcessed', 0]
+        ]);
+    }
+
+    public function onTwigTemplatePaths()
+    {
+        $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
+    }
+
+    public function onCollectionProcessed(Event $event)
+    {
+        $collection = $event['collection'];
+
+        foreach ($collection as $page) {
+            $this->pageProcess($page);
+        }
+    }
+
+    public function onPageProcessed(Event $event)
+    {
+        $page = $event['page'];
+
+        $this->pageProcess($page);
+    }
 }
