@@ -1,3 +1,9 @@
+# v1.1.1
+## 12/30/2014
+
+1. [](#bugfix)
+    * Fix problem with render template and Markdown.
+
 # v1.1.0
 ## 12/29/2014
 

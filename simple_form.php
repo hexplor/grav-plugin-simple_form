@@ -2,18 +2,22 @@
 
 use Grav\Common\Page\Page;
 use RocketTheme\Toolbox\Event\Event;
+
 use Grav\Common\Plugin;
+use Grav\Common\Data\Data;
 
 class Simple_FormPlugin extends Plugin
 {
     private $data = [];
 
+    //protected $config;
+
     private function mergeConfig(Page $page)
     {
-        $defaults = $this->grav['config']->get('plugins.simple_form');
+        $this->config = new Data((array) $this->grav['config']->get('plugins.simple_form'));
 
         if (is_array($page->header()->simple_form)) {
-            $this->grav['config']->set('plugins.simple_form', array_replace_recursive($defaults, $page->header()->simple_form));
+            $this->config = new Data(array_replace_recursive($this->config->toArray(), $page->header()->simple_form));
         }
     }
 
@@ -22,7 +26,7 @@ class Simple_FormPlugin extends Plugin
         if (isset($page->header()->simple_form) and $page->header()->simple_form) {
             $this->mergeConfig($page);
 
-            return ($this->grav['config']->get('plugins.simple_form.token')) ? true : false;
+            return ($this->config->get('token')) ? true : false;
         }
 
         return false;
@@ -30,23 +34,30 @@ class Simple_FormPlugin extends Plugin
 
     private function pageProcess(Page $page)
     {
-        $this->validate($page);
+        if (false === $this->validate($page)) {
+            return;
+        }
 
-        $config = $this->grav['config']->get('plugins.simple_form');
+        $template_vars = [
+            'fields'    => $this->config->get('fields'),
+            'token'     => $this->config->get('token'),
+            'messages'  => $this->config->get('messages')
+        ];
 
-        if ($config['short_code']) {
+        if ($this->config->get('short_code')) {
             $old_content = $page->content();
 
-            $this->data['html'] = $this->grav['twig']->twig()->render('plugins/simple_form/' . $config['template_file'], ['fields' => $config['fields'], 'token' => $config['token']]);
+            $this->data['html'] = trim($this->grav['twig']->twig()->render('plugins/simple_form/' . $this->config->get('template_file'), $template_vars));
 
-            $content = str_replace('{[' . $config['short_code'] . ']}', $this->data['html'], $old_content);
+            $content = str_replace('{[' . $this->config->get('short_code') . ']}', $this->data['html'], $old_content);
+
             $page->content($content);
         }
 
         /* @todo: Removed for now. */
         //$this->grav['twig']->twig_vars['simple_form'] = $this->data;
 
-        $this->grav['assets']->addInlineJs($this->grav['twig']->twig()->render('plugins/simple_form/simple_form.js.twig', ['fields' => $config['fields'], 'token' => $config['token'], 'messages' => $config['messages']]));
+        $this->grav['assets']->addInlineJs($this->grav['twig']->twig()->render('plugins/simple_form/simple_form.js.twig', $template_vars));
     }
 
     public static function getSubscribedEvents()
@@ -87,7 +98,6 @@ class Simple_FormPlugin extends Plugin
     public function onPageProcessed(Event $event)
     {
         $page = $event['page'];
-
         $this->pageProcess($page);
     }
 }

@@ -1,5 +1,5 @@
 name: Simple Form
-version: 1.1.0
+version: 1.1.1
 description: "This plugin add simple form working with webservice [Simple Form](http://getsimpleform.com) and sending email from your **Grav site**."
 icon: envelope-o
 author:
