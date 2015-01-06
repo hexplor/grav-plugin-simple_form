@@ -38,10 +38,6 @@ First of all you need to go to [Simple Form](https://getsimpleform.com/) and get
 
     token: (string)
 
-> The parsing of page content to replace the short code with the form (_default:_ <code>{[simple\_form]}</code> _or use your key change_). You can disable this feature (_for performance_) passing the <code>false</code> or a empty string to <code>short_code</code> key.
-
-    short_code: (string)
-
 > Template file used to rendering the form (_default:_ <code>simple_form.html.twig</code>). It's important when you want use more then one form in your site, with this key you can change the design for every form you want use, you need to change the token for have another email template.
 
     template_file: (string)
@@ -97,48 +93,69 @@ Also you can override the default options per-page:
 
     # "Lorem ipsum dolor sit amet"
 
-Or if you want use a config options then you can easy use this method:
-
-    ---
-    title: 'My "Page"'
-
-    simple_form: true
-    ---
-
-    # "Lorem ipsum dolor sit amet"
-
-With this method you use the config file options instead you write the options in the page header.
+With version 1.2.0 you not need to setup page headers to see the form, you need to use instead the Twig Function <code>{{ simple_form({ params }) }}</code>.
 
 You can customize the design of form override the files in `user/plugins/simple_form/templates/plugins/simple_form/` to `user/themes/your-theme/templates/plugins/simple_form/`.
 
-From the version 1.1.0 we have added the configuration key <code>template_file</code> to override the default template file for the form <code>simple_form.html.twig</code> to another one. The scenario is for the multiple/modular pages, this is a simple example:
+From the version 1.1.0 we have added the configuration key <code>template_file</code> to override the default template file for the form <code>simple_form</code> and load <code>simple_form.html.twig</code> and <code>simple_form.js.twig</code> to another one. The scenario is for the multiple/modular pages, this is a simple example:
 
 #### Contact Us
     ---
     title: "Contact Us"
     simple_form:
         token: "token-for-contact-us"
-        template_file: "contact_us.html.twig"
-    ---
-    {[simple_form]}
+        template_file: "contact_us"
 
-In this scenario the template file loaded is <code>plugins/simple_form/simple_form.html.twig</code>.
+    process:
+      twig: true
+    ---
+    {{ simple_form() }}
+
+In this scenario the template file loaded is <code>plugins/simple_form/contact_us.html.twig</code>.
 
 #### Share your idea
     ---
     title: "Share your idea with us"
     simple_form:
         token: "token-for-share-your-idea-with-us"
-        template_file: "share_your_idea_with_us.html.twig"
+        template_file: "share_your_idea_with_us"
+    process:
+      twig: true
     ---
     ## Share your idea with us
     Please use this form to share your idea:
 
-    {[simple_form]}
+    {{ simple_form() }}
 
 In this scenario we have another page or modular page with another token (_then another email format_) and use another template for the form view, the template file is <code>plugins/simple_form/share_your_idea_with_us.html.twig</code>.
 
-Another features coming from version 1.1.0 is the <code>short_code</code> configuration key, with this you can change the default short code key from <code>simple_form</code> to <code>my_simple_form_short_code</code>. This isn't important to change because it's working fine without edit this configuration key.
+With 1.2.0 implemented Twig function for this plugin, then you can add in your page with this example:
+
+    ---
+    title: "Page title"
+    process:
+      twig: true
+    simple_form:
+      token: "token-by-simpleform"
+    ---
+
+    ## Contact us
+    {{ simple_form() }}
+
+Or in you template you can use this:
+
+    {{ simple_form({ params }) }}
+
+where params is array with token and other informations.
+
+I suggested to use page header to configure simple_form then create a dedicated template for contact page then you use a empty function for see the form:
+
+    {{ simple_form() }}
+
+> **NOTE:** With 0.9.11 Grav added a fix for modular templates with twig process for page, you need to add into your page header where you need to parsing twig function from page:
+    process:
+      twig: true
+
 
 # Updating
 

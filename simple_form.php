@@ -8,96 +8,85 @@ use Grav\Common\Data\Data;
 
 class Simple_FormPlugin extends Plugin
 {
-    private $data = [];
+  public static function getSubscribedEvents()
+  {
+    return [
+      'onPluginsInitialized' => ['onPluginsInitialized', 0]
+    ];
+  }
 
-    //protected $config;
-
-    private function mergeConfig(Page $page)
-    {
-        $this->config = new Data((array) $this->grav['config']->get('plugins.simple_form'));
-
-        if (is_array($page->header()->simple_form)) {
-            $this->config = new Data(array_replace_recursive($this->config->toArray(), $page->header()->simple_form));
-        }
+  public function onPluginsInitialized()
+  {
+    if ($this->isAdmin()) {
+      $this->active = false;
+      return;
     }
 
-    private function validate(Page $page)
-    {
-        if (isset($page->header()->simple_form) and $page->header()->simple_form) {
-            $this->mergeConfig($page);
+    $this->enable([
+      'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
+      'onTwigInitialized'   => ['onTwigInitialized', 0]
+    ]);
+  }
 
-            return ($this->config->get('token')) ? true : false;
-        }
+  public function onTwigInitialized()
+  {
+    $this->grav['twig']->twig()->addFunction(
+    new \Twig_SimpleFunction('simple_form', [$this, 'simpleFormFunction'], ['is_safe' => ['html']])
+    );
+  }
 
-        return false;
+  public function onTwigTemplatePaths()
+  {
+    $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
+  }
+
+  public function simpleFormFunction($params = [])
+  {
+    // Collect page object, @todo: need evaluate a modular page.
+    $page = $this->grav['page'];
+
+    $this->mergeConfig($page, $params);
+
+    if (false === $this->validate($page, $params)) {
+      return;
     }
 
-    private function pageProcess(Page $page)
-    {
-        if (false === $this->validate($page)) {
-            return;
-        }
+    $template_vars = [
+      'fields'    => $this->config->get('fields'),
+      'token'     => $this->config->get('token'),
+      'messages'  => $this->config->get('messages')
+    ];
 
-        $template_vars = [
-            'fields'    => $this->config->get('fields'),
-            'token'     => $this->config->get('token'),
-            'messages'  => $this->config->get('messages')
-        ];
+    //$this->grav['assets']->addInlineJs($this->grav['twig']->twig()->render('plugins/simple_form/' . $this->config->get('template_file') . '.js.twig', $template_vars));
 
-        if ($this->config->get('short_code')) {
-            $old_content = $page->content();
+    $output = trim($this->grav['twig']->twig()->render('plugins/simple_form/' . $this->config->get('template_file') . '.html.twig', $template_vars));
 
-            $this->data['html'] = trim($this->grav['twig']->twig()->render('plugins/simple_form/' . $this->config->get('template_file'), $template_vars));
+    return $output;
+  }
 
-            $content = str_replace('{[' . $this->config->get('short_code') . ']}', $this->data['html'], $old_content);
-
-            $page->content($content);
-        }
-
-        /* @todo: Removed for now. */
-        //$this->grav['twig']->twig_vars['simple_form'] = $this->data;
-
-        $this->grav['assets']->addInlineJs($this->grav['twig']->twig()->render('plugins/simple_form/simple_form.js.twig', $template_vars));
+  private function validate(Page $page, $params)
+  {
+    if (isset($page->header()->simple_form) and $page->header()->simple_form and $this->config->get('token')) {
+      return true;
+    } elseif (isset($params['token'])) {
+      return true;
     }
 
-    public static function getSubscribedEvents()
-    {
-        return [
-            'onPluginsInitialized' => ['onPluginsInitialized', 0]
-        ];
+    return false;
+  }
+
+  private function mergeConfig(Page $page, $params = [])
+  {
+    $this->config = new Data((array) $this->grav['config']->get('plugins.simple_form'));
+
+    if (isset($page->header()->simple_form)) {
+      if (is_array($page->header()->simple_form)) {
+        $this->config = new Data(array_replace_recursive($this->config->toArray(), $page->header()->simple_form));
+      } else {
+        $this->config->set('enabled', $page->header()->simple_form);
+      }
     }
 
-    public function onPluginsInitialized()
-    {
-        if ($this->isAdmin()) {
-            $this->active = false;
-            return;
-        }
-
-        $this->enable([
-            'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
-            'onPageProcessed'           => ['onPageProcessed', 0],
-            'onCollectionProcessed'     => ['onCollectionProcessed', 0]
-        ]);
-    }
-
-    public function onTwigTemplatePaths()
-    {
-        $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
-    }
-
-    public function onCollectionProcessed(Event $event)
-    {
-        $collection = $event['collection'];
-
-        foreach ($collection as $page) {
-            $this->pageProcess($page);
-        }
-    }
-
-    public function onPageProcessed(Event $event)
-    {
-        $page = $event['page'];
-        $this->pageProcess($page);
-    }
+    $this->config = new Data(array_replace_recursive($this->config->toArray(), $params));
+  }
 }

@@ -2,7 +2,7 @@ enabled: true
 
 token: ""
 short_code: "simple_form"
-template_file: "simple_form.html.twig"
+template_file: "simple_form"
 
 fields:
     name:
