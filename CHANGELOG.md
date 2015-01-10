@@ -1,3 +1,9 @@
+# v1.2.1
+## 01/10/2015
+
+1. [](#improved)
+  * Add partial support for plugin configuration on Admin Plugin.
+
 # v1.2.0
 ## 01/06/2015
 
