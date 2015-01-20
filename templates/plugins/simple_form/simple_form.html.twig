@@ -15,6 +15,8 @@
                     <textarea id="simple_form-field-{{ key }}" name="{{ key }}" class="{{ field.class }}" placeholder="{{ field.placeholder }}" {% if field.required %}required="required"{% endif %}>{{ field.default }}</textarea>
                 {% elseif field.type == 'submit' %}
                     <button id="simple_form-field-{{ key }}" name="{{ key }}" class="{{ field.class }}">{{ field.title }}</button>
+                {% else %}
+                    <input type="text" id="simple_form-field-{{ key }}" name="{{ key }}" class="{{ field.class }}" placeholder="{{ field.placeholder }}" value="{{ field.default }}" {% if field.required %}required="required"{% endif %} />
                 {% endif %}
             </div>
         {% endfor %}

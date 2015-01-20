@@ -1,3 +1,9 @@
+# v1.2.2
+## 01/13/2015
+
+1. [](#bugfix)
+  * If field type not defined use text instead into template file.
+
 # v1.2.1
 ## 01/10/2015
 
