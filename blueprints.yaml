@@ -10,7 +10,7 @@ homepage: https://github.com/nunopress/grav-plugin-simple_form
 #demo: http://grav-demo.nunopress.com/
 keywords: "getsimpleform, form, contact, plugin, jquery, ajax"
 bugs: https://github.com/nunopress/grav-plugin-simple_form/issues
-docs: https://github.com/nunopress/grav-plugin-simple_form/README.md
+docs: https://github.com/nunopress/grav-plugin-simple_form/blob/develop/README.md
 license: MIT
 
 form:
