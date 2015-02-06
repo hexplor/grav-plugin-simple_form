@@ -8,6 +8,9 @@ use Grav\Common\Data\Data;
 
 class Simple_FormPlugin extends Plugin
 {
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
         return [
@@ -15,6 +18,9 @@ class Simple_FormPlugin extends Plugin
         ];
     }
 
+    /**
+     *
+     */
     public function onPluginsInitialized()
     {
         if ($this->isAdmin()) {
@@ -28,6 +34,9 @@ class Simple_FormPlugin extends Plugin
         ]);
     }
 
+    /**
+     *
+     */
     public function onTwigInitialized()
     {
         $this->grav['twig']->twig()->addFunction(
@@ -35,11 +44,18 @@ class Simple_FormPlugin extends Plugin
         );
     }
 
+    /**
+     *
+     */
     public function onTwigTemplatePaths()
     {
         $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
     }
 
+    /**
+     * @param array $params
+     * @return string|void
+     */
     public function simpleFormFunction($params = [])
     {
         // Collect page object, @todo: need evaluate a modular page.
@@ -59,14 +75,19 @@ class Simple_FormPlugin extends Plugin
 
         //$this->grav['assets']->addInlineJs($this->grav['twig']->twig()->render('plugins/simple_form/' . $this->config->get('template_file') . '.js.twig', $template_vars));
 
-        $output = trim($this->grav['twig']->twig()->render('plugins/simple_form/' . $this->config->get('template_file') . '.html.twig', $template_vars));
+        $output = trim($this->grav['twig']->twig()->render('plugins/simple_form/' . $this->config->get('template_file', 'simple_form') . '.html.twig', $template_vars));
 
         return $output;
     }
 
+    /**
+     * @param Page $page
+     * @param $params
+     * @return bool
+     */
     private function validate(Page $page, $params)
     {
-        if (isset($page->header()->simple_form) and $page->header()->simple_form and $this->config->get('token')) {
+        if ((isset($page->header()->simple_form) and $page->header()->simple_form) or $this->config->get('token')) {
             return true;
         } elseif (isset($params['token'])) {
             return true;
@@ -75,6 +96,10 @@ class Simple_FormPlugin extends Plugin
         return false;
     }
 
+    /**
+     * @param Page $page
+     * @param array $params
+     */
     private function mergePluginConfig(Page $page, $params = [])
     {
         $this->config = new Data((array) $this->grav['config']->get('plugins.simple_form'));

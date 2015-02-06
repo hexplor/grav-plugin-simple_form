@@ -1,3 +1,12 @@
+# v1.2.5
+## 02/06/2015
+
+1. [](#bugfix)
+    * Fixed bug in the Twig function without passing token value.
+    
+1. [](#improved)
+    * Added select support in the dinamic fields.
+
 # v1.2.4
 ## 02/04/2015
 

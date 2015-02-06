@@ -12,6 +12,17 @@ fields:
     class: ""
     required: true
 
+
+  category:
+    type: "select"
+    title: "Category"
+    class: ""
+    default: "Select one category"
+    options:
+      - "Category 1"
+      - "Category 2"
+    required: true
+
   email:
     type: "email"
     title: "Email"

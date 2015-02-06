@@ -53,6 +53,17 @@ First of all you need to go to [Simple Form](https://getsimpleform.com/) and get
             class: ""
             required: true
 
+        
+        category:
+            type: "select"
+            title: "Category"
+            class: ""
+            default: "Select one category"
+            options:
+              - "Category 1"
+              - "Category 2"
+            required: true
+        
         email:
             type: "email"
             title: "Email"
