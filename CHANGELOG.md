@@ -1,3 +1,9 @@
+# v1.2.6
+## 02/06/2015
+
+1. [](#bugfix)
+    * Added the missed validation for required into select field.
+
 # v1.2.5
 ## 02/06/2015
 

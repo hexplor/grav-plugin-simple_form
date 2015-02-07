@@ -16,9 +16,9 @@
                 {% elseif field.type == 'submit' %}
                     <button id="simple_form-field-{{ key }}" name="{{ key }}" class="{{ field.class }}">{{ field.title }}</button>
                 {% elseif field.type in ['select'] %}
-                    <select id="simple_form-field-{{ key }}" name="{{ key }}" class="{{ field.class }}">
+                    <select id="simple_form-field-{{ key }}" name="{{ key }}" class="{{ field.class }}" {% if field.required %}required="required"{% endif %}>
                         {% if field.default %}
-                            <option>{{ field.default }}</option>
+                            <option value="">{{ field.default }}</option>
                         {% endif %}
 
                         {% for option in field.options %}
