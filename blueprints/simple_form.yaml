@@ -9,30 +9,28 @@ form:
 
             simple_form:
               type: section
-              title: Simple Form
+              title: PLUGIN_SIMPLE_FORM.ADMIN.BLUEPRINTS.TAB.TITLE
               underline: true
 
               fields:
                 header.simple_form.token:
                   type: text
-                  label: SimpleForm.com Token
-                  placeholder: "Insert your API key here."
-                  help: "API key from https://simpleform.com site."
+                  label: PLUGIN_SIMPLE_FORM.ADMIN.BLUEPRINTS.TAB.FIELDS.TOKEN.LABEL
+                  placeholder: PLUGIN_SIMPLE_FORM.ADMIN.BLUEPRINTS.TAB.FIELDS.TOKEN.PLACEHOLDER
+                  help: PLUGIN_SIMPLE_FORM.ADMIN.BLUEPRINTS.TAB.FIELDS.TOKEN.HELP
                 header.simple_form.template_file:
                   type: select
                   classes: fancy
-                  label: "Template filename"
+                  label: PLUGIN_SIMPLE_FORM.ADMIN.BLUEPRINTS.TAB.FIELDS.TEMPLATE_FILE.LABEL
                   @data-options: '\Grav\Plugin\Simple_FormPlugin::getTemplatesList'
                   default: ''
                   options:
-                    '': Select one template file
+                    '': PLUGIN_SIMPLE_FORM.ADMIN.BLUEPRINTS.TAB.FIELDS.TEMPLATE_FILE.PLACEHOLDER
                 header.simple_form.redirect_to:
-                  type: pages
-                  label: Redirect to page
+                  type: select
+                  label: PLUGIN_SIMPLE_FORM.ADMIN.BLUEPRINTS.TAB.FIELDS.REDIRECT_TO.LABEL
                   classes: fancy
-                  show_all: false
-                  show_modular: false
-                  show_root: false
+                  @data-options: '\Grav\Plugin\Simple_FormPlugin::getPagesList'
                   default: ''
                   options :
-                    '': Select one page for redirect
+                    '': PLUGIN_SIMPLE_FORM.ADMIN.BLUEPRINTS.TAB.FIELDS.REDIRECT_TO.PLACEHOLDER

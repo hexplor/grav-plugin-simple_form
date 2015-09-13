@@ -1,3 +1,14 @@
+# v1.3.1
+## 09/14/2015
+
+1. [](#bugfix)
+    * Fixed the redirect_to twig variable because not rendered correctly.
+1. [](#improved)
+    * Use a internal method for rendering data from the select into the admin plugin page options for the redirect_to page. Validate if the good options update the admin plugin pages field.
+1. [](#new)
+    * Added translations.
+    * Added the translation for the template name.
+
 # v1.3.0
 ## 09/13/2015
 

@@ -42,6 +42,8 @@ You can use this plugin when you working on page, into the "Options" tab you can
 
 > **NOTE**: Template file need to stay into your template directory following this structure: `{theme-name}/templates/plugins/simple_form/{template_file}.html.twig`.
 
+> **NOTE**: Template name displayed into the admin plugin page options tab is possible to translate, following this structure "PLUGIN_SIMPLE_FORM.TEMPLATES.{template_file|upper}. Example for the default template used this string: PLUGIN_SIMPLE_FORM.TEMPLATES.DEFAULT.
+
 Options per-page example:
 
     ---

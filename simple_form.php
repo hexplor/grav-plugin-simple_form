@@ -4,6 +4,7 @@ namespace Grav\Plugin;
 
 use Grav\Common\Data\Blueprints;
 use Grav\Common\Grav;
+use Grav\Common\Page\Page;
 use Grav\Common\Plugin;
 use RocketTheme\Toolbox\Event\Event;
 
@@ -93,10 +94,12 @@ class Simple_FormPlugin extends Plugin
             return '';
         }
 
+        dump(static::getPagesList());
+
         $template_file = sprintf('/plugins/simple_form/%s.html.twig', $config->get('template_file'));
         $template_vars = [
             'token'         => $config->get('token'),
-            'redirect_to'   => $this->grav['uri']->route($config->get('redirect_to'), true) // Add the domain for cross-site redirect.
+            'redirect_to'   => $this->grav['uri']->rootUrl(true) . $config->get('redirect_to') // Add the domain for cross-site redirect.
         ];
 
         return $this->grav['twig']->processTemplate($template_file, $template_vars);
@@ -140,11 +143,34 @@ class Simple_FormPlugin extends Plugin
                     /** @var $file \SplFileinfo */
                     $file_key = str_replace('.html.twig', '', $file->getFilename());
 
-                    $template_files[ $file_key ] = Grav::instance()['language']->translate('PLUGIN_SIMPLEFORM.TEMPLATES.' . strtoupper($file_key));
+                    $template_files[ $file_key ] = Grav::instance()['language']->translate('PLUGIN_SIMPLE_FORM.TEMPLATES.' . strtoupper($file_key));
                 }
             }
         }
 
         return $template_files;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getPagesList()
+    {
+        $pages = Grav::instance()['pages'];
+
+        $pages_list = $pages->getList($pages->root());
+
+        $list = [];
+
+        foreach ($pages_list as $route => $title) {
+            /** @var Page $page */
+            $page = $pages->dispatch($route, false);
+
+            if (true === $page->routable()) {
+                $list[ $route ] = str_replace(' -', '-', str_replace('&nbsp; &nbsp; ', '- ', $title));
+            }
+        }
+
+        return $list;
     }
 }
