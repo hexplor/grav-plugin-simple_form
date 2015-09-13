@@ -1,3 +1,12 @@
+# v1.3.0
+## 09/13/2015
+
+1. [](#bugfix)
+    * Fixed CHANGELOG.md format.
+1. [](#improved)
+    * Complete rewrite, then check the README.md for understand how to working now.
+    * Added into admin plugin page options the possible to configure the plugin for the page.
+
 # v1.2.6
 ## 02/06/2015
 
@@ -9,7 +18,6 @@
 
 1. [](#bugfix)
     * Fixed bug in the Twig function without passing token value.
-    
 1. [](#improved)
     * Added select support in the dinamic fields.
 
@@ -60,11 +68,9 @@
 
 1. [](#bugfix)
     * Fix issue with cache content.
-
 1. [](#improved)
     * Change tab size to 4 from 2.
     * Update code design to PSR-2.
-
 1. [](#new)
     * Removed <code>auto_content</code> key from config/plugin. If you want overwrite the content, simply put the <code>{[simple_form]}</code> short code only in the page content.
     * Added the _configuration/page header_ key <code>short_code</code> for change the default short code key from <code>simple_form</code> to <code>my_short_code_key</code>.
@@ -76,7 +82,6 @@
 1. [](#bugfix)
     * Fixed bug when in the page header use <code>simple_form: false</code>.
     * Fixed bug for the page not see, now use collection and page to filter the form.
-
 1. [](#improved)
     * Added <code>number</code>, <code>url</code>, <code>range</code>, <code>date</code> for field type.
     * Use a private method to filter the form.

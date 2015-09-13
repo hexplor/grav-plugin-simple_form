@@ -1,5 +1,5 @@
 name: Simple Form
-version: 1.2.6
+version: 1.3.0
 description: "This plugin add simple form working with webservice [Simple Form](http://getsimpleform.com) and sending email from your **Grav site**."
 icon: envelope-o
 author:
@@ -26,18 +26,3 @@ form:
         0: Disabled
       validate:
         type: bool
-
-    token:
-      type: text
-      label: SimpleForm.com Token
-      placeholder: "Insert your API key here."
-      help: "API key from https://simpleform.com site."
-
-    template_file:
-      type: text
-      label: "Template filename"
-      placeholder: "Default template filename"
-
-    messages:
-      type: array
-      label: "Form messages"

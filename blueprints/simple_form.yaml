@@ -1,0 +1,38 @@
+form:
+  fields:
+    tabs:
+      fields:
+        options:
+          type: tab
+
+          fields:
+
+            simple_form:
+              type: section
+              title: Simple Form
+              underline: true
+
+              fields:
+                header.simple_form.token:
+                  type: text
+                  label: SimpleForm.com Token
+                  placeholder: "Insert your API key here."
+                  help: "API key from https://simpleform.com site."
+                header.simple_form.template_file:
+                  type: select
+                  classes: fancy
+                  label: "Template filename"
+                  @data-options: '\Grav\Plugin\Simple_FormPlugin::getTemplatesList'
+                  default: ''
+                  options:
+                    '': Select one template file
+                header.simple_form.redirect_to:
+                  type: pages
+                  label: Redirect to page
+                  classes: fancy
+                  show_all: false
+                  show_modular: false
+                  show_root: false
+                  default: ''
+                  options :
+                    '': Select one page for redirect

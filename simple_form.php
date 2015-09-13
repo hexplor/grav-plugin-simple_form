@@ -1,11 +1,16 @@
-<?php namespace Grav\Plugin;
+<?php
 
-use Grav\Common\Page\Page;
+namespace Grav\Plugin;
+
+use Grav\Common\Data\Blueprints;
+use Grav\Common\Grav;
+use Grav\Common\Plugin;
 use RocketTheme\Toolbox\Event\Event;
 
-use Grav\Common\Plugin;
-use Grav\Common\Data\Data;
-
+/**
+ * Class Simple_FormPlugin
+ * @package Grav\Plugin
+ */
 class Simple_FormPlugin extends Plugin
 {
     /**
@@ -14,7 +19,9 @@ class Simple_FormPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
-            'onPluginsInitialized' => ['onPluginsInitialized', 0]
+            'onPluginsInitialized'  => ['onPluginsInitialized', 0],
+            'onBlueprintCreated'    => ['onBlueprintCreated', 0],
+            'onTwigTemplatePaths'   => ['onTwigTemplatePaths', 0]
         ];
     }
 
@@ -23,13 +30,13 @@ class Simple_FormPlugin extends Plugin
      */
     public function onPluginsInitialized()
     {
-        if ($this->isAdmin()) {
+        if (true === $this->isAdmin()) {
             $this->active = false;
             return;
         }
 
         $this->enable([
-            'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
+            //'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0], // move this out of the admin check because i need into admin panel
             'onTwigInitialized'   => ['onTwigInitialized', 0]
         ]);
     }
@@ -40,7 +47,7 @@ class Simple_FormPlugin extends Plugin
     public function onTwigInitialized()
     {
         $this->grav['twig']->twig()->addFunction(
-            new \Twig_SimpleFunction('simple_form', [$this, 'simpleFormFunction'], ['is_safe' => ['html']])
+            new \Twig_SimpleFunction('simple_form', [$this, 'twigFunctionSimpleForm'], ['is_safe' => ['html']])
         );
     }
 
@@ -53,65 +60,91 @@ class Simple_FormPlugin extends Plugin
     }
 
     /**
+     * @param Event $event
+     */
+    public function onBlueprintCreated(Event $event)
+    {
+        static $inEvent = false;
+
+        /** @var \Grav\Common\Data\Blueprint $blueprint */
+        $blueprint = $event['blueprint'];
+
+        if (false === $inEvent and $blueprint->get('form.fields.tabs')) {
+            $inEvent = true;
+            $blueprints = new Blueprints(__DIR__ . '/blueprints/');
+            $extends = $blueprints->get('simple_form');
+            $blueprint->extend($extends, true);
+            $inEvent = false;
+        }
+    }
+
+    /**
      * @param array $params
      * @return string|void
      */
-    public function simpleFormFunction($params = [])
+    public function twigFunctionSimpleForm($params = [])
     {
         // Collect page object, @todo: need evaluate a modular page.
         $page = $this->grav['page'];
 
-        $this->mergePluginConfig($page, $params);
+        $config = $this->mergeConfig($page, false, $params);
 
-        if (false === $this->validate($page, $params)) {
-            return;
+        if (false === $this->validate($config)) {
+            return '';
         }
 
+        $template_file = sprintf('/plugins/simple_form/%s.html.twig', $config->get('template_file'));
         $template_vars = [
-            'fields'    => $this->config->get('fields'),
-            'token'     => $this->config->get('token'),
-            'messages'  => $this->config->get('messages')
+            'token'         => $config->get('token'),
+            'redirect_to'   => $this->grav['uri']->route($config->get('redirect_to'), true) // Add the domain for cross-site redirect.
         ];
 
-        //$this->grav['assets']->addInlineJs($this->grav['twig']->twig()->render('plugins/simple_form/' . $this->config->get('template_file') . '.js.twig', $template_vars));
-
-        $output = trim($this->grav['twig']->twig()->render('plugins/simple_form/' . $this->config->get('template_file', 'simple_form') . '.html.twig', $template_vars));
-
-        return $output;
+        return $this->grav['twig']->processTemplate($template_file, $template_vars);
     }
 
     /**
-     * @param Page $page
-     * @param $params
+     * @param object $config
      * @return bool
      */
-    private function validate(Page $page, $params)
+    private function validate($config)
     {
-        if ((isset($page->header()->simple_form) and $page->header()->simple_form) or $this->config->get('token')) {
-            return true;
-        } elseif (isset($params['token'])) {
-            return true;
-        }
+        $required_keys = [
+            'token',
+            'template_file',
+            'redirect_to'
+        ];
 
-        return false;
-    }
-
-    /**
-     * @param Page $page
-     * @param array $params
-     */
-    private function mergePluginConfig(Page $page, $params = [])
-    {
-        $this->config = new Data((array) $this->grav['config']->get('plugins.simple_form'));
-
-        if (isset($page->header()->simple_form)) {
-            if (is_array($page->header()->simple_form)) {
-                $this->config = new Data(array_replace_recursive($this->config->toArray(), $page->header()->simple_form));
-            } else {
-                $this->config->set('enabled', $page->header()->simple_form);
+        foreach ($required_keys as $key) {
+            if (null === $config->get($key)) {
+                return false;
             }
         }
 
-        $this->config = new Data(array_replace_recursive($this->config->toArray(), $params));
+        return true;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getTemplatesList()
+    {
+        $template_files = [];
+
+        // Search in all twig paths if the directory exists
+        foreach (Grav::instance()['twig']->twig_paths as $path) {
+            $template_dir = $path . '/plugins/simple_form';
+            if (true === is_dir($template_dir)) {
+                $iterator = new \GlobIterator($template_dir . '/*.html.twig', \FilesystemIterator::KEY_AS_FILENAME);
+
+                foreach ($iterator as $file) {
+                    /** @var $file \SplFileinfo */
+                    $file_key = str_replace('.html.twig', '', $file->getFilename());
+
+                    $template_files[ $file_key ] = Grav::instance()['language']->translate('PLUGIN_SIMPLEFORM.TEMPLATES.' . strtoupper($file_key));
+                }
+            }
+        }
+
+        return $template_files;
     }
 }
