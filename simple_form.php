@@ -93,9 +93,7 @@ class Simple_FormPlugin extends Plugin
         if (false === $this->validate($config)) {
             return '';
         }
-
-        dump(static::getPagesList());
-
+        
         $template_file = sprintf('/plugins/simple_form/%s.html.twig', $config->get('template_file'));
         $template_vars = [
             'token'         => $config->get('token'),
